@@ -1,7 +1,6 @@
 require 'httparty'
 require 'json'
-require 'roadmap'
-
+require './lib/roadmap'
 class Kele
   include HTTParty
   include Roadmap
@@ -24,9 +23,18 @@ class Kele
     @mentor_availability = JSON.parse(response.body)
   end
 
-  def get_messages(page)
-    response = self.class.get(api_url("message_threads?page=#{page}"), headers: { "authorization" => @auth_token })
+  def get_messages(page = nil)
+    if page == nil
+      response = self.class.get(api_url("message_threads"), headers: { "authorization" => @auth_token })
+    else
+      response = self.class.get(api_url("message_threads?page=#{page}"), headers: { "authorization" => @auth_token })
+    end
     @get_messages = JSON.parse(response.body)
+  end
+
+  def create_message(sender_email, recipient_id, subject, stripped_text)
+    response = self.class.post(api_url("messages"), headers: { "authorization" => @auth_token }, body: {sender_email: sender_email, recipient_id: recipient_id, subject: subject, stripped_text: stripped_text })
+    response.success? puts "Message sent."
   end
 
   private
